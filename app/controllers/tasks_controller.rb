@@ -1,5 +1,9 @@
 class TasksController < ApplicationController
 
+
+  before_filter :restrict_access
+
+
   #GET /tasks
   #GET /task.json
   def index
@@ -77,5 +81,14 @@ class TasksController < ApplicationController
 
     head :no_content
   end
+
+
+  private
+
+  def restrict_access
+    api_key = Task.find(params[:token])
+    head :unauthorized unless api_key
+  end
+  
 
 end
