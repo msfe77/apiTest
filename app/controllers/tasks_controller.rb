@@ -1,8 +1,6 @@
 class TasksController < ApplicationController
 
-
   before_filter :restrict_access
-
 
   #GET /tasks
   #GET /task.json
@@ -86,9 +84,9 @@ class TasksController < ApplicationController
   private
 
   def restrict_access
-    api_key = Task.find(params[:token])
+    api_key = Task.find_by_token(params[:token])
     head :unauthorized unless api_key
   end
-  
+
 
 end
