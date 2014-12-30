@@ -80,12 +80,17 @@ class TasksController < ApplicationController
     head :no_content
   end
 
-
   private
 
+#  def restrict_access
+#    api_key = Task.find_by_token(params[:token])
+#    head :unauthorized unless api_key
+#  end
+
   def restrict_access
-    api_key = Task.find_by_token(params[:token])
-    head :unauthorized unless api_key
+    authenticate_or_request_with_http_token do |token, options|
+      Task.exists?(token: token)
+    end
   end
 
 
