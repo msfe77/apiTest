@@ -1,16 +1,18 @@
 class TasksController < ApplicationController
 
-  before_filter :restrict_access
+  #before_filter :restrict_access
+
 
   #GET /tasks
   #GET /task.json
   def index
-    sql = "SELECT * FROM tasks "
-    @tasks = ActiveRecord::Base.connection.execute(sql)
+    #sql = "SELECT * FROM tasks "
+    #@tasks = ActiveRecord::Base.connection.execute(sql)
     #@tasks = Task.all
-    render json: @tasks
+    #render json: @tasks
   end
 
+  <<-CMNT
   #GET /tasks/1
   #GET /tasks/1.json
   def show
@@ -42,10 +44,12 @@ class TasksController < ApplicationController
     @tasks = Task.new
     render json: @tasks
   end
+  CMNT
 
   #POST /create/tasks/GNP
   def create
 
+    <<-JO
     @nameTask = params[:task]
     sql = "INSERT INTO tasks(name, created_at, updated_at)
     VALUES ( '" + @nameTask + "', current_timestamp, current_timestamp)"
@@ -57,8 +61,45 @@ class TasksController < ApplicationController
     else
       render json: @task.errors, status: :unprocessable_entity
     end
+    JO
+
+
+    @user = params[:task]
+    @pass = params[:pass]
+    @idType = params[:idType]
+    @idCompany = params[:idCompany]
+    @type = params[:kindQuery]
+
+    sql = "SELECT COUNT(*) FROM tasks WHERE name = '" + @user + "' AND token='" + @pass + "'"
+    @valor = ActiveRecord::Base.connection.execute(sql)
+    @value = @valor.first.first[1]
+
+    if Integer(@value) > 0
+
+    if @type == '1'
+
+    sql = "SELECT t.name as Type, c.name as Company FROM tasks t, companies c WHERE c.id =" + @idCompany + " AND t.id=" + @idType
+    @tasks = ActiveRecord::Base.connection.execute(sql)
+    #@tasks = Task.all
+    render json: @tasks
+
+    else
+
+      sql = "INSERT INTO tasks(name, token, created_at, updated_at)
+    VALUES ( '" + @user + "','" + @pass + "', current_timestamp, current_timestamp)"
+      @task = ActiveRecord::Base.connection.execute(sql)
+      #@task = Task.new(params[:task])
+
+    end
+
+    else
+
+    end
+
   end
 
+
+<<-DK
   #PATCH/PUT /tasks/1
   #PATCH/PUT /tasks/1.json
   def update
@@ -81,17 +122,22 @@ class TasksController < ApplicationController
   end
 
   private
+DK
 
-#  def restrict_access
-#    api_key = Task.find_by_token(params[:token])
-#    head :unauthorized unless api_key
-#  end
+  <<-SK
+  def restrict_access
+    api_key = Task.find_by_token(params[:token])
+    head :unauthorized unless api_key
+  end
+  SK
 
+  <<-SUPERSECURE
   def restrict_access
     authenticate_or_request_with_http_token do |token, options|
       Task.exists?(token: token)
     end
   end
+  SUPERSECURE
 
 
 end

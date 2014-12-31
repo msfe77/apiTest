@@ -15,7 +15,7 @@
 development:
   adapter: postgresql
   encoding: unicode
-  database: apiTest
+  database: apiTest2
   pool: 5
   username: postgresql
   password: sirevicBD77
